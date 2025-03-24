@@ -1,0 +1,76 @@
+import random
+import string
+
+
+def generate(kwargs):
+    result = []
+    num = kwargs.get('num', 1)  # 获取生成数据的数量，默认为1
+
+    for _ in range(num):
+        res = []
+        for key, value in kwargs.items():  # 将 k 替换为 key，v 替换为 value
+            if key == 'num':  # 跳过 num 键
+                continue
+            elif isinstance(key, type) and key is int:  # 生成整数
+                res.append(random.randint(value['datarange'][0], value['datarange'][1]))
+            elif isinstance(key, type) and key is float:  # 生成浮点数
+                res.append(random.uniform(value['datarange'][0], value['datarange'][1]))
+            elif isinstance(key, type) and key is str:  # 生成随机字符串
+                datarange, length = value['datarange'], value['len']
+                tmp = ''.join(random.choices(datarange, k=length))
+                res.append(tmp)
+            elif isinstance(key, type) and key is dict:  # 生成字典
+                elem = {random.randint(0, 10): random.randint(0, 10)}
+                res.append(elem)
+            elif isinstance(key, type) and key is list:  # 生成列表（递归）
+                res.append(generate(value))  # 注意：这里需要解包 value
+            elif isinstance(key, type) and key is tuple:  # 生成元组（递归）
+                res.append(tuple(generate(value)))  # 注意：这里需要解包 value
+            else:
+                continue
+        result.append(res)
+    return result
+
+
+def main():
+    # struct = {
+    #     'num': 2,  # 生成2组数据
+    #     tuple: {
+    #         str: {"datarange": string.ascii_uppercase, "len": 10},  # 生成10个随机大写字母的字符串
+    #         list: {
+    #             int: {"datarange": (0, 10)},  # 生成0到10之间的随机整数
+    #             float: {"datarange": (0, 1.0)}  # 生成0到1.0之间的随机浮点数
+    #         },
+    #         dict: {}  # 生成一个随机字典
+    #     }
+    # }
+    struct = {
+        'num': 3,  # 生成3组数据
+        list: {
+            int: {"datarange": (0, 100)},  # 生成0到100之间的随机整数
+            float: {"datarange": (0, 10.0)},  # 生成0到10.0之间的随机浮点数
+            str: {"datarange": string.ascii_lowercase, "len": 5},  # 生成5个随机小写字母的字符串
+            dict: {
+                tuple: {
+                    int: {"datarange": (1, 10)},  # 生成1到10之间的随机整数
+                    list: {
+                        str: {"datarange": string.digits, "len": 3}  # 生成3个随机数字的字符串
+                    }
+                }
+            },
+            list: {
+                tuple: {
+                    float: {"datarange": (0, 1.0)},  # 生成0到1.0之间的随机浮点数
+                    dict: {
+                        str: {"datarange": string.ascii_uppercase, "len": 4}  # 生成4个随机大写字母的字符串
+                    }
+                }
+            }
+        }
+    }
+
+    print(generate(struct))  # 生成数据并打印
+
+
+if __name__ == "__main__":
+    main()
